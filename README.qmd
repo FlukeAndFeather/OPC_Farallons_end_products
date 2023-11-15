@@ -1,5 +1,5 @@
 ---
-title: "Rasters"
+title: "OPC Farallons End Products"
 format: gfm
 editor: visual
 ---
@@ -9,12 +9,6 @@ editor: visual
 #| echo: false
 
 library(tidyverse)
-
-```
-
-```{r}
-#| output: asis
-#| echo: false
 
 # Final output should look like:
 # <details>
@@ -70,8 +64,18 @@ print_month <- function(month, rows) {
   ")
 }
 
-.file_path <- dir(here::here("rasters"), pattern = ".*.gr[di]") 
-.file_path %>% 
+```
+
+## Rasters
+
+```{r}
+#| output: asis
+#| echo: false
+
+
+
+raster_paths <- dir("rasters", pattern = ".*.gr[di]") 
+raster_paths %>% 
   str_split("[_-]") %>% 
   map(\(x) tibble(species = x[1],
                   year = x[2],
@@ -79,7 +83,7 @@ print_month <- function(month, rows) {
                   day = str_sub(x[4], 1, 2),
                   extension = str_sub(x[4], 3))) %>% 
   list_rbind() %>% 
-  mutate(file_path = .file_path) %>% 
+  mutate(file_path = raster_paths) %>% 
   nest(.by = year) %>% 
   mutate(markdown = map2_chr(year, data, print_year)) %>% 
   pull(markdown) %>% 
