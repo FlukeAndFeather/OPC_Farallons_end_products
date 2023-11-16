@@ -9,6 +9,8 @@ editor: visual
 #| echo: false
 
 library(tidyverse)
+library(purrr)
+library(stringr)
 
 # Final output should look like:
 # <details>
@@ -82,6 +84,33 @@ raster_paths %>%
                   month = x[3],
                   day = str_sub(x[4], 1, 2),
                   extension = str_sub(x[4], 3))) %>% 
+  list_rbind() %>% 
+  mutate(file_path = raster_paths) %>% 
+  nest(.by = year) %>% 
+  mutate(markdown = map2_chr(year, data, print_year)) %>% 
+  pull(markdown) %>% 
+  paste0(collapse = "\n") %>% 
+  cat()
+
+```
+
+## Rasters
+
+```{r}
+#| output: asis
+#| echo: false
+
+
+
+raster_paths <- dir("two_week_rasters", pattern = ".*.gr[di]") 
+raster_paths %>% 
+  gsub("start","",.) %>% 
+  str_split("[_-]") %>% 
+  map(\(x) tibble(species = x[1],
+                  year = x[2],
+                  month = x[3],
+                  day = x[4],
+                  extension = str_sub(x[7], 2))) %>% 
   list_rbind() %>% 
   mutate(file_path = raster_paths) %>% 
   nest(.by = year) %>% 
