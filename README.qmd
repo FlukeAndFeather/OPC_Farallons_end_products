@@ -68,7 +68,7 @@ print_month <- function(month, rows) {
 
 ```
 
-## Rasters
+## Daily rasters
 
 ```{r}
 #| output: asis
@@ -94,6 +94,58 @@ raster_paths %>%
 
 ```
 
+## Daily maps
+
+```{r}
+#| output: asis
+#| echo: false
+
+
+
+raster_paths <- dir("maps", pattern = ".png") 
+raster_paths %>% 
+  str_split("[_-]") %>% 
+  map(\(x) tibble(species = x[1],
+                  year = x[2],
+                  month = x[3],
+                  day = str_sub(x[4], 1, 2),
+                  extension = str_sub(x[4], 3))) %>% 
+  list_rbind() %>% 
+  mutate(file_path = raster_paths) %>% 
+  nest(.by = year) %>% 
+  mutate(markdown = map2_chr(year, data, print_year)) %>% 
+  pull(markdown) %>% 
+  paste0(collapse = "\n") %>% 
+  cat()
+
+```
+
+## Daily EPAC metadata
+
+```{r}
+#| output: asis
+#| echo: false
+
+
+
+raster_paths <- dir("epac_metadata", pattern = ".csv") 
+raster_paths %>% 
+  str_split("[_-]") %>% 
+  map(\(x) tibble(
+                  year = x[2],
+                  month = x[3],
+                  day = str_sub(x[4], 1, 2),
+                  extension = str_sub(x[4], 3))) %>% 
+  list_rbind() %>% 
+  mutate(file_path = raster_paths) %>% 
+  nest(.by = year) %>% 
+  mutate(markdown = map2_chr(year, data, print_year)) %>% 
+  pull(markdown) %>% 
+  paste0(collapse = "\n") %>% 
+  cat()
+
+```
+
 ## Two week rasters
 
 ```{r}
@@ -104,6 +156,33 @@ raster_paths %>%
 
 raster_paths <- dir("two_week_rasters", pattern = ".*.gr[di]") 
 raster_paths %>% 
+  gsub("end","",.) %>% 
+  str_split("[_-]") %>% 
+  map(\(x) tibble(species = x[1],
+                  year = x[2],
+                  month = x[3],
+                  day = x[4],
+                  extension = str_sub(x[7], 2))) %>% 
+  list_rbind() %>% 
+  mutate(file_path = raster_paths) %>% 
+  nest(.by = year) %>% 
+  mutate(markdown = map2_chr(year, data, print_year)) %>% 
+  pull(markdown) %>% 
+  paste0(collapse = "\n") %>% 
+  cat()
+
+```
+
+## Two week maps
+
+```{r}
+#| output: asis
+#| echo: false
+
+
+
+raster_paths <- dir("two_week_maps", pattern = ".png") 
+raster_paths %>% 
   gsub("start","",.) %>% 
   str_split("[_-]") %>% 
   map(\(x) tibble(species = x[1],
@@ -111,6 +190,32 @@ raster_paths %>%
                   month = x[3],
                   day = x[4],
                   extension = str_sub(x[7], 2))) %>% 
+  list_rbind() %>% 
+  mutate(file_path = raster_paths) %>% 
+  nest(.by = year) %>% 
+  mutate(markdown = map2_chr(year, data, print_year)) %>% 
+  pull(markdown) %>% 
+  paste0(collapse = "\n") %>% 
+  cat()
+
+```
+
+## Two week metadata
+
+```{r}
+#| output: asis
+#| echo: false
+
+
+
+raster_paths <- dir("two_week_metadata", pattern = ".csv") 
+raster_paths %>% 
+  str_split("[_-]") %>% 
+  map(\(x) tibble(species = x[1],
+                  year = x[3],
+                  month = x[4],
+                  day = str_sub(x[5], 1, 2),
+                  extension = str_sub(x[5], 2))) %>% 
   list_rbind() %>% 
   mutate(file_path = raster_paths) %>% 
   nest(.by = year) %>% 
