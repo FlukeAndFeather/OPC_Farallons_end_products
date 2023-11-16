@@ -94,7 +94,7 @@ raster_paths %>%
 
 ```
 
-## Rasters
+## Two week rasters
 
 ```{r}
 #| output: asis
