@@ -1,0 +1,93 @@
+---
+title: "OPC Farallons End Products"
+format: gfm
+editor: visual
+---
+
+```{r}
+#| output: false
+#| echo: false
+
+library(tidyverse)
+
+# Final output should look like:
+# <details>
+#   <summary>2023</summary>
+#   <details>
+#     <summary>03</summary>
+#     [anchovy_2023-03-01.grd](anchovy_2023-03-01.grd)
+#     [anchovy_2023-03-01.gri](anchovy_2023-03-01.gri)
+#     ...
+#     [anchovy_2023-03-31.grd](anchovy_2023-03-31.grd)
+#     [anchovy_2023-03-31.gri](anchovy_2023-03-31.gri)
+#     ...
+#     [bluewhale_2023-03-01.grd](bluewhale_2023-03-01.grd)
+#     [bluewhale_2023-03-01.gri](bluewhale_2023-03-01.gri)
+#     ...
+#     [humpback_2023-03-31.grd](humpback_2023-03-31.grd)
+#     [humpback_2023-03-31.gri](humpback_2023-03-31.gri)
+#   </details>
+#   ...
+#   <details>
+#     <summary>12</summary>
+#     [anchovy_2023-12-01.grd](anchovy_2023-12-01.grd)
+#     ...
+#     [humpback_2023-12-31.gri](humpback_2023-12-31.gri)
+#   </details>
+# </details>
+# ...
+
+# Generate Markdown output for a given year
+print_year <- function(year, rows) {
+  months <- rows %>% 
+    nest(.by = month) %>% 
+    mutate(markdown = map2_chr(month, data, print_month)) %>% 
+    pull(markdown) %>% 
+    paste0(collapse = "\n")
+  str_glue("
+  <details>
+    <summary>{year}</summary>
+    {months}
+  </details>
+  ")
+}
+
+# Generate Markdown output for a given month
+print_month <- function(month, rows) {
+  links <- str_glue("[{rows$file_path}]({rows$file_path})") %>% 
+    paste0(collapse = "\n\n")
+  str_glue("
+  <details>
+    <summary>{month}</summary>
+    {links}
+  </details>
+  ")
+}
+
+```
+
+## Rasters
+
+```{r}
+#| output: asis
+#| echo: false
+
+
+
+raster_paths <- dir("rasters", pattern = ".*.gr[di]") 
+raster_paths %>% 
+  str_split("[_-]") %>% 
+  map(\(x) tibble(species = x[1],
+                  year = x[2],
+                  month = x[3],
+                  day = str_sub(x[4], 1, 2),
+                  extension = str_sub(x[4], 3))) %>% 
+  list_rbind() %>% 
+  mutate(file_path = raster_paths) %>% 
+  nest(.by = year) %>% 
+  mutate(markdown = map2_chr(year, data, print_year)) %>% 
+  pull(markdown) %>% 
+  paste0(collapse = "\n") %>% 
+  cat()
+
+```
